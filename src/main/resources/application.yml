@@ -1,0 +1,96 @@
+spring:
+  application:
+    name: tdd-stack
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/appdb
+    username: appuser
+    password: apppass
+    hikari:
+      maximum-pool-size: 20
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redispass
+      timeout: 2s
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 10m
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/tdd-app
+          jwk-set-uri: http://localhost:8081/realms/tdd-app/protocol/openid-connect/certs
+
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      endpoint: http://localhost:4566
+      credentials:
+        access-key: test
+        secret-key: test
+      sqs:
+        listener:
+          poll-timeout: 10s
+
+aws:
+  region: us-east-1
+  endpoint: http://localhost:4566
+  access-key: test
+  secret-key: test
+  s3:
+    bucket-uploads: app-uploads
+    bucket-archive: app-archive
+  sqs:
+    order-events-queue: order-events
+    notifications-queue: notifications
+
+temporal:
+  enabled: false
+  service-address: localhost:7233
+  namespace: default
+  task-queue: ORDER_TASK_QUEUE
+
+feature:
+  enableArchive: true
+  enableNotifications: true
+  maxRetries: 3
+
+user-service:
+  base-url: http://localhost:9999
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.example: DEBUG
+    org.hibernate.SQL: DEBUG

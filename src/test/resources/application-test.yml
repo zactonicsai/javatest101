@@ -1,0 +1,20 @@
+spring:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://placeholder/realms/test
+          jwk-set-uri: http://placeholder/realms/test/protocol/openid-connect/certs
+
+temporal:
+  enabled: false
+
+logging:
+  level:
+    org.testcontainers: INFO
+    com.github.dockerjava: WARN

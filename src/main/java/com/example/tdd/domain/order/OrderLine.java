@@ -1,5 +1,6 @@
 package com.example.tdd.domain.order;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ public class OrderLine {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonIgnore // breaks the Order ↔ OrderLine cycle when Jackson serializes for the Redis cache
     private Order order;
 
     @Column(nullable = false, length = 64)

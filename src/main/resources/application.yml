@@ -66,6 +66,11 @@ aws:
     order-events-queue: order-events
     notifications-queue: notifications
 
+# =============================================================================
+# Temporal — disabled by default. Flip to true once the temporal container
+# is up and you want a real worker polling. Workflow unit tests don't need
+# this (they use TestWorkflowExtension).
+# =============================================================================
 temporal:
   enabled: false
   service-address: localhost:7233

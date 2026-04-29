@@ -81,6 +81,14 @@ public class ApiExceptionHandler {
             "Resource was modified by another request — please retry");
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError onAccessDenied(org.springframework.security.access.AccessDeniedException e) {
+        // Catches Spring Security 6's AuthorizationDeniedException too (it extends AccessDeniedException).
+        // Without this, the catch-all Exception handler below would map 403 → 500.
+        return new ApiError("FORBIDDEN", "Access denied");
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError onUnexpected(Exception e) {

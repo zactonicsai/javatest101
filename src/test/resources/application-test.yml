@@ -1,4 +1,12 @@
 spring:
+  # The awspring SQS listener container would otherwise (a) fail to start in tests
+  # that don't run LocalStack (e.g. OrderServiceCacheTest), and (b) eat the test
+  # message in CreateOrderE2ETest before we can read it back from the queue.
+  # OrderEventPublisher continues to work because it uses the SqsClient bean
+  # defined in AwsConfig, not anything from this auto-config.
+  autoconfigure:
+    exclude:
+      - io.awspring.cloud.autoconfigure.sqs.SqsAutoConfiguration
   flyway:
     enabled: false
   jpa:

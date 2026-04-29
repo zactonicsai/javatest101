@@ -1,0 +1,58 @@
+# =============================================================================
+# Temporal dynamic configuration — development profile (Postgres backend)
+#
+# This file is mounted into the temporal container at:
+#   /etc/temporal/config/dynamicconfig/development-sql.yaml
+# and is referenced by docker-compose via DYNAMIC_CONFIG_FILE_PATH.
+#
+# Dynamic config controls runtime behaviour of the Temporal cluster — search
+# attribute caching, namespace defaults, history shard counts, retention, etc.
+# Without this file, temporalio/auto-setup logs warnings on every poll cycle.
+#
+# In production this file is replaced by your real cluster config; do NOT
+# copy these dev values into a prod deployment.
+# =============================================================================
+
+# ---- Search attributes ------------------------------------------------------
+# Force the search-attribute cache to refresh on every read so newly-added
+# attributes show up immediately in dev. Production clusters keep this off.
+system.forceSearchAttributesCacheRefreshOnRead:
+  - value: true
+    constraints: {}
+
+# Allow long workflow IDs (defaults to 255; bumping to 1000 prevents pain in
+# tests that build composite IDs from UUIDs and dates).
+limit.maxIDLength:
+  - value: 1000
+    constraints: {}
+
+# ---- Frontend rate limits — generous for local dev --------------------------
+frontend.rps:
+  - value: 2400
+    constraints: {}
+
+frontend.namespaceRPS:
+  - value: 2400
+    constraints: {}
+
+# ---- History service --------------------------------------------------------
+# Smaller transaction batch sizes are friendlier to local Postgres.
+history.persistenceMaxQPS:
+  - value: 3000
+    constraints: {}
+
+# How long Temporal retains completed workflow histories. 7 days is plenty for
+# dev; production typically uses 30+ days for compliance / debugging.
+system.retentionDays:
+  - value: 7
+    constraints: {}
+
+# ---- Worker & task queue ----------------------------------------------------
+# These influence how aggressively workers poll. Defaults are fine for dev,
+# but reducing the per-task-queue history shard count keeps logs quieter.
+matching.numTaskqueueWritePartitions:
+  - value: 1
+    constraints: {}
+matching.numTaskqueueReadPartitions:
+  - value: 1
+    constraints: {}

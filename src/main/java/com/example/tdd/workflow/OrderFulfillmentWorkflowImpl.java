@@ -32,7 +32,7 @@ public class OrderFulfillmentWorkflowImpl implements OrderFulfillmentWorkflow {
         status = "PAYING";
         FulfillmentActivities.PaymentResult payment = activities.chargePayment(orderId, amount);
         if (!payment.success()) {
-            return OrderResult.failed("payment_declined:" + payment.declineReason());
+            return OrderResult.ofFailure("payment_declined:" + payment.declineReason());
         }
 
         status = "RESERVING";
@@ -42,7 +42,7 @@ public class OrderFulfillmentWorkflowImpl implements OrderFulfillmentWorkflow {
         if (cancelled) {
             activities.releaseInventory(reservation);
             status = "CANCELLED";
-            return OrderResult.cancelled();
+            return OrderResult.ofCancellation();
         }
 
         status = "SHIPPING";
@@ -50,7 +50,7 @@ public class OrderFulfillmentWorkflowImpl implements OrderFulfillmentWorkflow {
 
         activities.notifyCustomer(orderId, "Shipped: " + tracking);
         status = "SHIPPED";
-        return OrderResult.success(tracking);
+        return OrderResult.ofSuccess(tracking);
     }
 
     @Override public void cancelRequested() { cancelRequested = true; }

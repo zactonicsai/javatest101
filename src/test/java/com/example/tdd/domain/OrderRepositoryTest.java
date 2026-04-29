@@ -95,15 +95,25 @@ class OrderRepositoryTest {
         em.flush();
         em.clear();
 
+        // Two independent detached snapshots, both at version 0.
+        // Without these clears, the persistence-context's first-level cache
+        // would hand back the SAME managed instance for both findById calls
+        // and there would be no version conflict to detect.
         Order loadedA = repo.findById(saved.getId()).orElseThrow();
+        em.detach(loadedA);
         Order loadedB = repo.findById(saved.getId()).orElseThrow();
+        em.detach(loadedB);
 
+        // First "transaction" wins: merges into a managed copy at v=0,
+        // UPDATE ... WHERE version=0 succeeds, version becomes 1 in DB.
         loadedA.markStatus(OrderStatus.PAID);
         repo.saveAndFlush(loadedA);
+        em.clear(); // discard the now-managed copy so the next merge re-loads from DB
 
-        em.detach(loadedA);
+        // Second "transaction" loses: loadedB still carries version=0, but the row
+        // is at version=1. UPDATE ... WHERE version=0 affects 0 rows, Hibernate
+        // throws StaleObjectStateException → Spring translates → ObjectOptimisticLockingFailureException.
         loadedB.markStatus(OrderStatus.SHIPPED);
-
         assertThatThrownBy(() -> repo.saveAndFlush(loadedB))
             .isInstanceOf(ObjectOptimisticLockingFailureException.class);
     }
